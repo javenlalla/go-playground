@@ -29,6 +29,44 @@ func main() {
 	for user := range users {
 		log.Println(user)
 	}
+
+	if _, e := getUserRecord(db, 123452); e == false {
+		log.Println("Record not found")
+	}
+
+	u, e := getUserRecord(db, 1234)
+	if e == false {
+		log.Println("Record not found")
+	} else {
+		log.Println(u)
+	}
+}
+
+// getUserRecord fetches a User record from the Users Bucket by the provided User ID.
+func getUserRecord(db *bbolt.DB, id int) (User, bool) {
+	var u User
+	exists := false
+
+	err := db.View(func(tx *bbolt.Tx) error {
+		b := tx.Bucket([]byte("users"))
+
+		v := b.Get(itob(id))
+		if len(v) > 0 {
+			err := json.Unmarshal(v, &u)
+			if err != nil {
+				log.Fatalf("Error parsing record: %s", err)
+			}
+			exists = true
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		log.Fatalf("Error retrieving record by key: %s", err)
+	}
+
+	return u, exists
 }
 
 // readData retrieves records from the Users Bucket.
