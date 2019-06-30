@@ -1,0 +1,3 @@
+total 4
+-rwxr-xr-x    1 root     root           917 Mar 10 01:29 executing_commands.go
+-rwxr-xr-x    1 root     root             0 Mar 10 01:29 sample.txt

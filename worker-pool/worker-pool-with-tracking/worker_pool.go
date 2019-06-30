@@ -1,19 +1,24 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"sync"
 	"time"
 )
 
 type WorkerPool struct {
 	NumberOfWorkers int
+	TotalInput int
+	InputProcessed int
 	Task Task
 }
 
 type Worker struct {
 	Wg *sync.WaitGroup
+	TotalInput int
+	InputProcesed *int
 	Task Task
+	sync.Mutex
 }
 
 type Task struct {
@@ -29,6 +34,8 @@ func (wp *WorkerPool) Run (done chan bool) {
 		w := Worker{
 			Wg: &wg,
 			Task: wp.Task,
+			TotalInput: wp.TotalInput,
+			InputProcesed: &wp.InputProcessed,
 		}
 
 		go w.Work()
@@ -43,15 +50,27 @@ func (w *Worker) Work() {
 
 	for i := range w.Task.Input {
 		w.Task.Execute(i)
+
+		w.Lock()
+
+		*w.InputProcesed++
+		if *w.InputProcesed % 5 == 0 {
+			log.Printf("%d out of %d processed.", *w.InputProcesed, w.TotalInput)
+		}
+
+		w.Unlock()
 	}
 }
 
 func main() {
 	input := make(chan int) // Update channel to required channel type.
 
+	data := fetchDataForProcessing()
+
 	done := make(chan bool)
 	wp := WorkerPool{
 		NumberOfWorkers: 50, // Update number of workers desired.
+		TotalInput: len(data),
 		Task: Task{
 			Input: input,
 			Execute: workFunction, // Update target work function.
@@ -60,22 +79,25 @@ func main() {
 	go wp.Run(done)
 
 	// Fetch the data needed for processing and send to the Input channel of the WorkPool.
-	fetchDataForProcessing(input)
+	for _, i := range data {
+		input <- i
+	}
+	close(input)
 
 	<-done
 }
 
-func fetchDataForProcessing(input chan int) {
+func fetchDataForProcessing() []int {
+	var data []int
 	for rs := 0; rs < 200; rs++ {
-		input <- rs
+		data = append(data, rs)
 	}
 
-	close(input)
+	return data
 }
 
 // workFunction signature should match the individual element in the `input` channel type.
 func workFunction(o int) {
 	// Simulate work being done.
 	time.Sleep(time.Second)
-	fmt.Println(o)
 }
