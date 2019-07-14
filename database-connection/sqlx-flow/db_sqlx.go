@@ -52,6 +52,9 @@ func main() {
 		NullValue: sql.NullInt64{},
 	})
 
+	log.Println("Fetching non-existant User via marshalling.")
+	log.Println(getNonExistentUserViaRowMarshal(db))
+
 	log.Println("Executing database operations using native sql API.")
 	users := make(chan User)
 	go getUsers(db, users)
@@ -105,6 +108,31 @@ func getUsersViaRowMarshal(db *sqlx.DB) []User {
 	//}
 
 	return users
+}
+
+func getNonExistentUserViaRowMarshal(db *sqlx.DB) (User, bool) {
+	query := `
+		SELECT
+			id,
+			first_name,
+			last_name,
+			email,
+		    null_column
+		FROM
+			golang_playground.users
+		WHERE
+			id = ?
+	`
+
+	var user User
+	err := db.Get(&user, query, 100)
+	if err == sql.ErrNoRows {
+		return user, false
+	} else if err != nil {
+		log.Fatalf("Unable to execute Select query: %s. Error: %s", query, err)
+	}
+
+	return user, true
 }
 
 func getUsers(db *sqlx.DB, users chan User) {
