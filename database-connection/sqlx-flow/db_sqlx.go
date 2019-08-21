@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	dataSourceName = "root:root@tcp(go-development-database)/golang_playground"
+	dataSourceName = "root:root@tcp(localhost:3012)/golang_playground"
 )
 
 type User struct {
@@ -52,7 +52,7 @@ func main() {
 		NullValue: sql.NullInt64{},
 	})
 
-	log.Println("Fetching non-existant User via marshalling.")
+	log.Println("Fetching non-existent User via marshalling.")
 	log.Println(getNonExistentUserViaRowMarshal(db))
 
 	log.Println("Executing database operations using native sql API.")

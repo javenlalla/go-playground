@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	dataSourceName = "root:root@tcp(go-development-database)/golang_playground"
+	dataSourceName = "root:root@tcp(localhost:3012)/golang_playground"
 )
 
 type User struct {
