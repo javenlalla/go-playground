@@ -1,5 +1,10 @@
 package main
 
+// General tips:
+//
+// 1. If the JSON data being unmarshaled is an array, create a Struct to represent each element and treat the target
+// variable as a slice of said Struct. See `sampleJSONTypeOne`
+
 import (
 	"encoding/json"
 	"log"
@@ -11,6 +16,22 @@ type User struct {
 	EmailAddress string `json:"email"`
 	Pets []string `json:"pets"`
 }
+
+type UsersReport struct {
+	Users []User `json:"UsersReport"`
+}
+
+const (
+	sampleJSONTypeOne = `[
+		{"name": "Test Name", "email": "test1@test.com"},
+		{"name": "Testing Name 2",    "email": "test2@test.com"}
+	]`
+
+	sampleJSONTypeTwo = `{"UsersReport": [
+		{"name": "Test Name", "email": "test1@test.com"},
+		{"name": "Testing Name 2",    "email": "test2@test.com"}
+	]}`
+)
 
 func main() {
 	convertStructToJson()
@@ -34,10 +55,7 @@ func convertStructToJson() {
 }
 
 func convertJsonToStruct() {
-	var jsonBlob = []byte(`[
-		{"name": "Test Name", "email": "test1@test.com"},
-		{"name": "Testing Name 2",    "email": "test2@test.com"}
-	]`)
+	jsonBlob := []byte(sampleJSONTypeOne)
 
 	var users []User
 	err := json.Unmarshal(jsonBlob, &users)
@@ -46,4 +64,14 @@ func convertJsonToStruct() {
 	}
 
 	log.Println(users)
+
+	jsonBlob = []byte(sampleJSONTypeTwo)
+
+	var usersTwo UsersReport
+	err = json.Unmarshal(jsonBlob, &usersTwo)
+	if err != nil {
+		log.Fatalf("Unable to parse JSON: %s", err)
+	}
+
+	log.Println(usersTwo)
 }
