@@ -1,10 +1,12 @@
 package main
 
 // Dependencies
-// MySQL Driver: go get -u github.com/go-sql-driver/mysql
+//
+// MySQL Driver:
+// go get -u github.com/go-sql-driver/mysql
 //
 // sqlx: https://github.com/jmoiron/sqlx
-//	- go get github.com/jmoiron/sqlx
+// go get github.com/jmoiron/sqlx
 
 import (
 	"database/sql"
