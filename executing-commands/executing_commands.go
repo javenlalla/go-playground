@@ -1,15 +1,41 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 func main() {
 	//execCommand()
 	//execDockerComposeCommand()
-	execRawBashCommand()
+	//execRawBashCommand()
+	execCommandWithSeparateStreams()
+}
+
+func execCommandWithSeparateStreams() {
+	app := "docker"
+
+	arg0 := "ps"
+	arg1 := "-s"
+	arg2 := "--format"
+	arg3 := "'{\"Names\":\"{{ .Names }}\", \"Size\":\"{{ .Size }}\"}'"
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd := exec.Command(app, arg0, arg1, arg2, arg3)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("Error running command: %s. Command Output: %s", err, stderr.String())
+	}
+
+	for _, outputLine := range strings.Split(strings.TrimSpace(stdout.String()), "\n") {
+		fmt.Println(outputLine)
+	}
 }
 
 func execRawBashCommand() {
